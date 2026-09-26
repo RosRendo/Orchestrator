@@ -1,0 +1,32 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:1.54.4
+    container_name: orchestrator-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      # Allow iframe embedding
+      - N8N_DISABLE_UI_SECURITY=true
+
+      # Cookie management inside iframe contexts
+      - N8N_SAMESITE_COOKIE=none
+      - N8N_SECURE_COOKIE=false
+
+      # Lightweight SQLite database
+      - DB_TYPE=sqlite
+
+      # Suppress enterprise/version noise on Community edition
+      - N8N_VERSION_NOTIFICATIONS_ENABLED=false
+      - N8N_HIDE_USAGE_PAGE=true
+
+      # Pin deprecated defaults explicitly to avoid future breaking changes
+      - N8N_UNVERIFIED_PACKAGES_ENABLED=true
+      - N8N_RUNNERS_TASK_TIMEOUT=300
+      - N8N_COMPRESSION_NODE_MAX_DECOMPRESSED_SIZE_BYTES=2147483648
+      - N8N_COMPRESSION_NODE_MAX_ZIP_ENTRIES=5000
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:

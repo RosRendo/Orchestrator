@@ -1,0 +1,9 @@
+{
+  "vpsTargets": [],
+  "vercelToken": "",
+  "sentryToken": "",
+  "cloudflareToken": "",
+  "awsRegion": "",
+  "awsAccessKeyId": "",
+  "awsSecretAccessKey": ""
+}

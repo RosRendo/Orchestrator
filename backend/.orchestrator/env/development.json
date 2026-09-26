@@ -1,0 +1,45 @@
+{
+  "variables": [
+    {
+      "key": "OPENAI_API_KEY",
+      "value": "your_key_here"
+    },
+    {
+      "key": "GEMINI_API_KEY",
+      "value": "your_key_here"
+    },
+    {
+      "key": "DEEPSEEK_API_KEY",
+      "value": "your_key_here"
+    },
+    {
+      "key": "ANTHROPIC_API_KEY",
+      "value": "your_key_here"
+    },
+    {
+      "key": "MISTRAL_API_KEY",
+      "value": "your_key_here"
+    },
+    {
+      "key": "GROQ_API_KEY",
+      "value": "your_key_here"
+    },
+    {
+      "key": "OPENROUTER_API_KEY",
+      "value": "your_key_here"
+    },
+    {
+      "key": "TOGETHER_API_KEY",
+      "value": "your_key_here"
+    },
+    {
+      "key": "PERPLEXITY_API_KEY",
+      "value": "your_key_here"
+    },
+    {
+      "key": "COHERE_API_KEY",
+      "value": "your_key_here"
+    }
+  ],
+  "updatedAt": "2026-08-23T08:43:23.389Z"
+}

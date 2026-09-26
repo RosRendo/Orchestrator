@@ -1,0 +1,35 @@
+{
+  "profile": {
+    "codingStyle": "- TypeScript\n- NestJS\n- Prisma\n- Clean architecture",
+    "preferences": "- Explain simply\n- Use production patterns\n- Avoid shortcuts"
+  },
+  "knowledgeBase": [
+    {
+      "id": "kb-1",
+      "title": "Workspace Layout Info",
+      "content": "Our architecture uses NestJS backend on port 3005 and Next.js frontend on port 3000."
+    }
+  ],
+  "documents": [],
+  "prompts": [
+    {
+      "id": "p-1",
+      "title": "Standard Refactor Prompt",
+      "content": "Review and refactor the following logic to enforce clean SOLID principles and modern standards."
+    }
+  ],
+  "templates": [
+    {
+      "id": "t-1",
+      "title": "NestJS Endpoint Template",
+      "content": "import { Controller, Get } from '@nestjs/common';\n\n@Controller('resource')\nexport class ResourceController {\n  @Get()\n  async get() {\n    return { ok: true };\n  }\n}"
+    }
+  ],
+  "rules": [
+    {
+      "id": "r-1",
+      "title": "General Code Rule",
+      "content": "Use descriptive variable names. Document complex algorithms with brief inline comments."
+    }
+  ]
+}

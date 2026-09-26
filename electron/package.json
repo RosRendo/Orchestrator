@@ -1,0 +1,13 @@
+{
+  "name": "rendoos-desktop",
+  "version": "1.0.0",
+  "description": "RendoOS Desktop Shell & System Tray Orchestrator",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "dependencies": {
+    "electron": "^33.2.1"
+  }
+}
