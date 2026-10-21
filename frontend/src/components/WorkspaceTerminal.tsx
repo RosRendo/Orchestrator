@@ -21,8 +21,8 @@ export default function WorkspaceTerminal({ projectId, initialCommand, hideHeade
   useEffect(() => {
     if (!terminalRef.current) return;
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3005';
-    const socket = io(backendUrl);
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? (typeof window !== 'undefined' ? '' : 'http://127.0.0.1:3005');
+    const socket = io(backendUrl || undefined);
     socketRef.current = socket;
 
     // Initialize Terminal

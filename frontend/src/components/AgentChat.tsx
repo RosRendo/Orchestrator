@@ -28,8 +28,8 @@ export default function AgentChat({ projectId }: AgentChatProps) {
 
   // Initialize WebSockets
   useEffect(() => {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3005';
-    const socket = io(backendUrl);
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? (typeof window !== 'undefined' ? '' : 'http://127.0.0.1:3005');
+    const socket = io(backendUrl || undefined);
     socketRef.current = socket;
 
     socket.on('chat:status', (data: { status: string }) => {
