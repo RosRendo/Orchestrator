@@ -11,7 +11,9 @@
     "start:runner": "node runner.js"
   },
   "dependencies": {
-    "next": "16.3.2"
+    "next": "^16.3.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "engines": {
     "node": ">=20.0.0"
