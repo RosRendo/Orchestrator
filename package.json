@@ -1,15 +1,17 @@
 {
-  "name": "rendoos-fullstack",
+  "name": "rendoos-orchestrator",
   "version": "1.0.0",
-  "description": "RendoOS — Founder & AI Operating System (Unified Fullstack)",
+  "description": "RendoOS — Founder & AI Operating System",
   "private": true,
   "scripts": {
-    "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build",
-    "start": "node runner.js",
-    "start:dev": "node runner.js --dev",
-    "install:all": "cd backend && npm install && cd ../frontend && npm install"
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd frontend && npm run start",
+    "dev": "cd frontend && npm run dev",
+    "build:all": "cd backend && npm run build && cd ../frontend && npm run build",
+    "start:runner": "node runner.js"
+  },
+  "dependencies": {
+    "next": "16.3.2"
   },
   "engines": {
     "node": ">=20.0.0"
