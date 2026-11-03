@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const BACKEND_INTERNAL_URL = process.env.BACKEND_INTERNAL_URL || 'http://127.0.0.1:3005';
+const BACKEND_INTERNAL_URL = process.env.BACKEND_INTERNAL_URL || 'https://orchestrator.dashboardkiller.online';
 
 const nextConfig: NextConfig = {
   async rewrites() {
