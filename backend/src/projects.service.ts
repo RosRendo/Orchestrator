@@ -752,5 +752,313 @@ export class ProjectsService {
 
     return { ok: true, msg: 'Mission execution triggered' };
   }
+
+  // ─── RendoOs & AI-Command-Agent Integrated Hub Methods ──────────────────────
+
+  async getTodaySummary() {
+    const focusProject = await this.prisma.project.findFirst({
+      where: {
+        OR: [{ isPrimary: true }, { status: 'ACTIVE' }],
+      },
+      include: {
+        tasks: {
+          where: { status: 'TODO' },
+          orderBy: { order: 'asc' },
+          take: 5,
+        },
+        blockers: {
+          where: { resolved: false },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    const nowTasks = await this.prisma.task.findMany({
+      where: { bucket: 'NOW', status: 'TODO' },
+      include: { project: { select: { id: true, name: true } } },
+      orderBy: { order: 'asc' },
+      take: 6,
+    });
+
+    const nextTasks = await this.prisma.task.findMany({
+      where: { bucket: 'NEXT', status: 'TODO' },
+      include: { project: { select: { id: true, name: true } } },
+      orderBy: { order: 'asc' },
+      take: 6,
+    });
+
+    const laterTasks = await this.prisma.task.findMany({
+      where: { bucket: 'LATER', status: 'TODO' },
+      include: { project: { select: { id: true, name: true } } },
+      orderBy: { order: 'asc' },
+      take: 6,
+    });
+
+    const unresolvedBlockers = await this.prisma.blocker.findMany({
+      where: { resolved: false },
+      include: { project: { select: { id: true, name: true } } },
+      take: 10,
+    });
+
+    const totalProjects = await this.prisma.project.count();
+    const activeProjects = await this.prisma.project.count({ where: { status: 'ACTIVE' } });
+    const totalTasks = await this.prisma.task.count();
+    const completedTasks = await this.prisma.task.count({ where: { status: 'DONE' } });
+    const ideasCount = await this.prisma.idea.count();
+
+    return {
+      focusProject,
+      nowTasks,
+      nextTasks,
+      laterTasks,
+      blockers: unresolvedBlockers,
+      stats: {
+        totalProjects,
+        activeProjects,
+        totalTasks,
+        completedTasks,
+        ideasCount,
+      },
+    };
+  }
+
+  async listTasks(projectId?: string) {
+    if (projectId) {
+      return this.prisma.task.findMany({
+        where: { projectId },
+        orderBy: [{ bucket: 'asc' }, { order: 'asc' }],
+      });
+    }
+    return this.prisma.task.findMany({
+      include: { project: { select: { id: true, name: true } } },
+      orderBy: [{ bucket: 'asc' }, { order: 'asc' }],
+    });
+  }
+
+  async createTask(data: {
+    projectId: string;
+    title: string;
+    description?: string;
+    bucket?: string;
+    priority?: string;
+  }) {
+    return this.prisma.task.create({
+      data: {
+        projectId: data.projectId,
+        title: data.title,
+        description: data.description,
+        bucket: data.bucket || 'NOW',
+        priority: data.priority || 'MEDIUM',
+        status: 'TODO',
+      },
+    });
+  }
+
+  async updateTask(id: string, data: any) {
+    return this.prisma.task.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async deleteTask(id: string) {
+    return this.prisma.task.delete({
+      where: { id },
+    });
+  }
+
+  async listIdeas() {
+    return this.prisma.idea.findMany({
+      include: { project: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createIdea(data: { title: string; description?: string; tags?: string; projectId?: string }) {
+    return this.prisma.idea.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        tags: data.tags,
+        projectId: data.projectId || null,
+      },
+    });
+  }
+
+  async deleteIdea(id: string) {
+    return this.prisma.idea.delete({
+      where: { id },
+    });
+  }
+
+  async convertIdeaToProject(id: string) {
+    const idea = await this.prisma.idea.findUnique({ where: { id } });
+    if (!idea) throw new NotFoundException('Idea not found');
+
+    const slug = idea.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const projPath = path.join('D:/FOR RENDO (ONLY )/Personal Project', idea.title.replace(/[\/\\:*?"<>|]/g, ''));
+
+    const project = await this.prisma.project.create({
+      data: {
+        name: idea.title,
+        slug,
+        path: projPath,
+        folderPath: projPath,
+        description: idea.description || `Generated from Idea: ${idea.title}`,
+        status: 'IDEA',
+      },
+    });
+
+    await this.prisma.idea.update({
+      where: { id },
+      data: { convertedToProjectId: project.id },
+    });
+
+    return project;
+  }
+
+  async listBlockers() {
+    return this.prisma.blocker.findMany({
+      include: { project: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createBlocker(data: { projectId: string; title: string; description?: string }) {
+    return this.prisma.blocker.create({
+      data: {
+        projectId: data.projectId,
+        title: data.title,
+        description: data.description,
+      },
+    });
+  }
+
+  async resolveBlocker(id: string) {
+    const blk = await this.prisma.blocker.findUnique({ where: { id } });
+    if (!blk) throw new NotFoundException('Blocker not found');
+    return this.prisma.blocker.update({
+      where: { id },
+      data: { resolved: !blk.resolved },
+    });
+  }
+
+  async listPlaybook(type?: string) {
+    const where: any = {};
+    if (type) where.type = type.toUpperCase();
+    return this.prisma.playbookEntry.findMany({
+      where,
+      include: { project: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createPlaybookEntry(data: {
+    projectId?: string;
+    type: string;
+    title: string;
+    content: string;
+    tags?: string;
+    scope?: string;
+  }) {
+    return this.prisma.playbookEntry.create({
+      data: {
+        projectId: data.projectId || null,
+        type: data.type.toUpperCase(),
+        title: data.title,
+        content: data.content,
+        tags: data.tags,
+        scope: data.scope || 'GLOBAL',
+      },
+    });
+  }
+
+  async scanProjectGaps(projectId: string) {
+    const project = await this.getProject(projectId);
+    const findings: Array<{
+      category: string;
+      title: string;
+      description: string;
+      severity: string;
+      autoFixCode?: string;
+    }> = [];
+
+    if (!fs.existsSync(project.path)) {
+      return { findings, score: '0/100', status: 'Path Not Found' };
+    }
+
+    // 1. Check Rate Limiting
+    const hasRateLimit = fs.existsSync(path.join(project.path, 'package.json')) &&
+      fs.readFileSync(path.join(project.path, 'package.json'), 'utf-8').includes('rate-limit');
+    if (!hasRateLimit) {
+      findings.push({
+        category: 'SECURITY',
+        title: 'Missing API Rate Limiting',
+        description: 'No rate-limiting package (e.g. express-rate-limit, @nestjs/throttler) was detected in package.json.',
+        severity: 'HIGH',
+        autoFixCode: 'npm install express-rate-limit\n// or for NestJS:\nnpm install @nestjs/throttler',
+      });
+    }
+
+    // 2. Check CORS Configuration
+    let openCorsFound = false;
+    try {
+      const serverFiles = ['src/main.ts', 'server.js', 'src/server.js', 'src/app.ts'];
+      for (const sf of serverFiles) {
+        const fullP = path.join(project.path, sf);
+        if (fs.existsSync(fullP)) {
+          const content = fs.readFileSync(fullP, 'utf-8');
+          if (content.includes("origin: '*'") || content.includes('app.use(cors())')) {
+            openCorsFound = true;
+            break;
+          }
+        }
+      }
+    } catch {}
+
+    if (openCorsFound) {
+      findings.push({
+        category: 'SECURITY',
+        title: 'Permissive Wildcard CORS Detected',
+        description: 'Server configuration appears to use open CORS (origin: *). Restrict to trusted frontends.',
+        severity: 'MEDIUM',
+      });
+    }
+
+    // 3. Check Test Suite
+    const hasTests = fs.existsSync(path.join(project.path, 'test')) ||
+                     fs.existsSync(path.join(project.path, 'tests')) ||
+                     fs.existsSync(path.join(project.path, '__tests__'));
+    if (!hasTests) {
+      findings.push({
+        category: 'TESTING',
+        title: 'Missing Automated Test Suite',
+        description: 'No test directory (test/, tests/) or test runners configured for integration verification.',
+        severity: 'MEDIUM',
+      });
+    }
+
+    // 4. Check Database Backup / Docker
+    const hasDocker = fs.existsSync(path.join(project.path, 'docker-compose.yml')) ||
+                      fs.existsSync(path.join(project.path, 'Dockerfile'));
+    if (!hasDocker) {
+      findings.push({
+        category: 'DEVOPS',
+        title: 'Missing Docker / Containerization Config',
+        description: 'No Dockerfile or docker-compose.yml found for reproducible production runtime.',
+        severity: 'LOW',
+      });
+    }
+
+    const score = Math.max(0, 100 - (findings.filter(f => f.severity === 'HIGH').length * 30 + findings.filter(f => f.severity === 'MEDIUM').length * 15 + findings.filter(f => f.severity === 'LOW').length * 5));
+
+    return {
+      projectId,
+      projectName: project.name,
+      score: `${score}/100`,
+      findings,
+      scannedAt: new Date().toISOString(),
+    };
+  }
 }
 

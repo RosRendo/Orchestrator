@@ -9,6 +9,12 @@ import SkillHubView from '@/components/SkillHubView';
 import BusinessHQView from '@/components/BusinessHQView';
 import MultiModelArenaView from '@/components/MultiModelArenaView';
 import WarRoomChatView from '@/components/WarRoomChatView';
+import TodayFocusView from '@/components/TodayFocusView';
+import IdeasInboxView from '@/components/IdeasInboxView';
+import ArchitectureCanvasView from '@/components/ArchitectureCanvasView';
+import EngineeringPlaybookView from '@/components/EngineeringPlaybookView';
+import GapEngineView from '@/components/GapEngineView';
+import PromptTemplateView from '@/components/PromptTemplateView';
 
 // xterm.js uses browser-only globals (self, window) — must disable SSR
 const WorkspaceTerminal = dynamic(
@@ -6047,6 +6053,29 @@ export default function Dashboard() {
               <span className="sidebar-item-label">Home</span>
             </div>
 
+            {/* Today Focus (RendoOs) */}
+            <div
+              onClick={() => setActiveTab('today')}
+              className={`sidebar-item ${activeTab === 'today' ? 'active' : ''}`}
+              style={{
+                background: activeTab === 'today' ? 'linear-gradient(90deg, rgba(245, 158, 11, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%)' : undefined,
+                border: activeTab === 'today' ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid transparent',
+              }}
+            >
+              <span style={{ fontSize: '1.1rem', lineHeight: 1, flexShrink: 0 }}>⚡</span>
+              <span className="sidebar-item-label" style={{ fontWeight: 600 }}>Today Focus</span>
+              <span className="sidebar-item-badge" style={{ background: '#f59e0b', color: '#000', fontWeight: 800 }}>NOW</span>
+            </div>
+
+            {/* Ideas Inbox (RendoOs) */}
+            <div
+              onClick={() => setActiveTab('ideas')}
+              className={`sidebar-item ${activeTab === 'ideas' ? 'active' : ''}`}
+            >
+              <span style={{ fontSize: '1.1rem', lineHeight: 1, flexShrink: 0 }}>💡</span>
+              <span className="sidebar-item-label">Ideas Inbox</span>
+            </div>
+
             {/* Workspaces */}
             <div 
               onClick={() => setActiveTab('projects')}
@@ -6186,6 +6215,59 @@ export default function Dashboard() {
             >
               <span style={{ fontSize: '1.15rem', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', flexShrink: 0 }}>🧠</span>
               <span className="sidebar-item-label">AI Workspace</span>
+            </div>
+
+            {/* Architecture Canvas (AI OS) */}
+            <div
+              onClick={() => setActiveTab('canvas')}
+              className={`sidebar-item ${activeTab === 'canvas' ? 'active' : ''}`}
+              style={{
+                background: activeTab === 'canvas' ? 'rgba(56, 189, 248, 0.12)' : undefined,
+                border: activeTab === 'canvas' ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid transparent',
+              }}
+            >
+              <span style={{ fontSize: '1.1rem', lineHeight: 1, flexShrink: 0 }}>📐</span>
+              <span className="sidebar-item-label">Arch Canvas</span>
+            </div>
+
+            {/* Engineering Playbook & Memory (AI OS) */}
+            <div
+              onClick={() => setActiveTab('playbook')}
+              className={`sidebar-item ${activeTab === 'playbook' ? 'active' : ''}`}
+              style={{
+                background: activeTab === 'playbook' ? 'rgba(139, 92, 246, 0.12)' : undefined,
+                border: activeTab === 'playbook' ? '1px solid rgba(139, 92, 246, 0.3)' : '1px solid transparent',
+              }}
+            >
+              <span style={{ fontSize: '1.1rem', lineHeight: 1, flexShrink: 0 }}>📖</span>
+              <span className="sidebar-item-label">Playbook & ADRs</span>
+            </div>
+
+            {/* Production Gap Engine (AI OS) */}
+            <div
+              onClick={() => setActiveTab('gapengine')}
+              className={`sidebar-item ${activeTab === 'gapengine' ? 'active' : ''}`}
+              style={{
+                background: activeTab === 'gapengine' ? 'rgba(16, 185, 129, 0.12)' : undefined,
+                border: activeTab === 'gapengine' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
+              }}
+            >
+              <span style={{ fontSize: '1.1rem', lineHeight: 1, flexShrink: 0 }}>🛡️</span>
+              <span className="sidebar-item-label">Gap Engine</span>
+              <span className="sidebar-item-badge" style={{ background: '#10b981', color: '#000', fontWeight: 800 }}>Audit</span>
+            </div>
+
+            {/* Prompt Template Library (AI OS) */}
+            <div
+              onClick={() => setActiveTab('prompts')}
+              className={`sidebar-item ${activeTab === 'prompts' ? 'active' : ''}`}
+              style={{
+                background: activeTab === 'prompts' ? 'rgba(6, 182, 212, 0.12)' : undefined,
+                border: activeTab === 'prompts' ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid transparent',
+              }}
+            >
+              <span style={{ fontSize: '1.1rem', lineHeight: 1, flexShrink: 0 }}>📝</span>
+              <span className="sidebar-item-label">Prompt Library</span>
             </div>
 
             {/* Local CLI Agents Dropdown */}
@@ -6671,6 +6753,18 @@ export default function Dashboard() {
             <span style={styles.breadcrumbActive}>
               {activeTab === 'home'
                 ? 'Home'
+                : activeTab === 'today'
+                ? "Today's Focus & Command Center"
+                : activeTab === 'ideas'
+                ? 'Ideas & Experiment Scratchpad'
+                : activeTab === 'canvas'
+                ? 'Interactive Architecture Canvas'
+                : activeTab === 'playbook'
+                ? 'Engineering Playbook & ADRs'
+                : activeTab === 'gapengine'
+                ? '"What Did I Forget?" Gap Engine'
+                : activeTab === 'prompts'
+                ? 'Prompt Template Library'
                 : activeTab === 'skills'
                 ? 'Skill Hub & Directory'
                 : activeTab === 'business'
@@ -6765,8 +6859,20 @@ export default function Dashboard() {
         {/* Main Workspace below the Top Bar */}
         <main style={{ ...styles.mainContent, ...((activeTab === 'terminal' || activeTab === 'docker' || activeTab === 'obsidian' || activeTab === 'intelligence' || activeTab === 'notion' || activeTab === 'dbexplorer' || activeTab === 'git' || activeTab === 'apiclient' || activeAgent?.type === 'local') ? { padding: 0, overflow: 'hidden' } : {}) }}>
 
-          {/* ══════════════════════════ HOME DASHBOARD ══════════════════════════ */}
-          {activeTab === 'home' ? (
+          {/* ══════════════════════════ INTEGRATED VIEWS ══════════════════════════ */}
+          {activeTab === 'today' ? (
+            <TodayFocusView />
+          ) : activeTab === 'ideas' ? (
+            <IdeasInboxView />
+          ) : activeTab === 'canvas' ? (
+            <ArchitectureCanvasView />
+          ) : activeTab === 'playbook' ? (
+            <EngineeringPlaybookView />
+          ) : activeTab === 'gapengine' ? (
+            <GapEngineView />
+          ) : activeTab === 'prompts' ? (
+            <PromptTemplateView />
+          ) : activeTab === 'home' ? (
             <div className="animate-fade-in" style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
               {/* Greeting */}
               <div style={{ marginBottom: '28px' }}>
@@ -9395,45 +9501,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'rgba(15, 23, 42, 0.3)',
     backdropFilter: 'blur(8px)',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 999,
-  },
-  modalContent: {
-    width: '100%',
-    maxWidth: '520px',
-    padding: '32px',
-    borderRadius: '16px',
-    position: 'relative',
-    background: 'var(--card-bg)',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
-    border: '1px solid var(--panel-border)',
-  },
-  modalHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '24px',
-  },
-  closeButton: {
-    color: 'var(--text-muted)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  modalError: {
-    background: 'var(--error-glow)',
-    border: '1px solid var(--error)',
-    color: '#ef4444',
-    padding: '10px 14px',
-    borderRadius: '6px',
-    fontSize: '0.875rem',
-  },
+    ali
   formGroup: {
     display: 'flex',
     flexDirection: 'column',

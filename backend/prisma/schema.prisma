@@ -7,19 +7,190 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+  id        String   @id @default(uuid())
+  name      String   @default("Rendo")
+  handle    String   @default("@rendo")
+  avatar    String?
+  bio       String?  @default("Software Engineer & Builder")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Project {
-  id            String    @id @default(uuid())
-  name          String
-  path          String    @unique
-  description   String?
-  stack         String?   // JSON: ["NestJS","Next.js","PostgreSQL"]
-  tags          String?   // JSON: ["trading","backend"]
-  deployTargets String?   // JSON: {frontend:"vercel",backend:"vps"}
-  agentConfig   String?   // JSON: {preferredAgent:"hermes"}
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  missions      Mission[]
+  id               String    @id @default(uuid())
+  name             String
+  slug             String?   @unique
+  path             String    @unique
+  folderPath       String?   // Alias/sync for path
+  description      String?
+  status           String    @default("ACTIVE") // ACTIVE, EXPERIMENT, PAUSED, ARCHIVED, IDEA
+  isPrimary        Boolean   @default(false)
+  progress         Int       @default(0) // 0 to 100
+  image            String?
+  mobileImage      String?
+  currentMilestone String?
+  overview         String?   // What is this? Who is it for? Why does it exist?
+  stack            String?   // JSON: ["NestJS","Next.js","PostgreSQL"]
+  techStack        String?   // JSON: { frontend: [], backend: [], database: [], infrastructure: [] }
+  architecture     String?   // Mermaid diagram code
+  databaseDesign   String?   // Database ERD (Mermaid ER diagram), table schemas, or SQL/Prisma schema
+  flowExplainer    String?   // How it works: user journey, features, flow narrative (markdown)
+  repoUrl          String?
+  liveUrl          String?
+  tags             String?   // JSON: ["trading","backend"]
+  deployTargets    String?   // JSON: {frontend:"vercel",backend:"vps"}
+  agentConfig      String?   // JSON: {preferredAgent:"hermes"}
+
+  // Local Process Management
+  runScript        String?   @default("npm run dev")
+  port             Int?
+  isRunning        Boolean   @default(false)
+  backendPath      String?
+  backendScript    String?
+  backendPort      Int?
+  isBackendRunning Boolean   @default(false)
+  extraPath        String?
+  extraScript      String?
+  extraPort        Int?
+  extraName        String?   @default("Mobile")
+  isExtraRunning   Boolean   @default(false)
+  health           String    @default("HEALTHY") // HEALTHY, ATTENTION, BLOCKED
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  tasks            Task[]
+  blockers         Blocker[]
+  ideas            Idea[]
+  links            Link[]
+  milestones       Milestone[]
+  activities       Activity[]
+  notes            Note[]
+  playbook         PlaybookEntry[]
+  gapReports       GapReport[]
+  sessions         Session[]
+  missions         Mission[]
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  projectId   String
+  title       String
+  description String?
+  status      String    @default("TODO") // TODO, DONE
+  bucket      String    @default("NOW") // NOW, NEXT, LATER
+  priority    String    @default("MEDIUM") // HIGH, MEDIUM, LOW
+  dueDate     DateTime?
+  order       Int       @default(0)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Blocker {
+  id          String   @id @default(uuid())
+  projectId   String
+  title       String
+  description String?
+  resolved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Idea {
+  id                   String   @id @default(uuid())
+  title                String
+  description          String?
+  projectId            String?
+  convertedToProjectId String?
+  tags                 String?  // comma-separated or json
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  project              Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+model Link {
+  id        String   @id @default(uuid())
+  projectId String
+  title     String
+  url       String
+  type      String   @default("OTHER") // GITHUB, FIGMA, PROD, STAGING, DOCS, OTHER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Milestone {
+  id          String    @id @default(uuid())
+  projectId   String
+  title       String
+  progress    Int       @default(0) // 0 to 100
+  status      String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  order       Int       @default(0)
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id          String    @id @default(uuid())
+  projectId   String?
+  type        String    // TASK_COMPLETED, MILESTONE_UPDATED, PROJECT_UPDATED, BLOCKER_RESOLVED, IDEA_CREATED, NOTE_CREATED
+  title       String
+  description String?
+  createdAt   DateTime  @default(now())
+
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Note {
+  id          String    @id @default(uuid())
+  projectId   String?
+  title       String
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model PlaybookEntry {
+  id          String   @id @default(uuid())
+  projectId   String?
+  type        String   // "DECISION" | "PATTERN" | "LESSON" | "ANTI_PATTERN"
+  title       String
+  content     String   // Problem, cause, solution / ADR rationale
+  tags        String?  // JSON or comma separated
+  scope       String   @default("GLOBAL") // "GLOBAL" | "PROJECT" | "REUSABLE"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model GapReport {
+  id          String   @id @default(uuid())
+  projectId   String
+  category    String   // "SECURITY" | "PERFORMANCE" | "DATABASE" | "TESTING" | "DEVOPS"
+  title       String
+  description String
+  severity    String   // "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
+  status      String   @default("OPEN") // "OPEN" | "FIXED" | "IGNORED"
+  autoFixCode String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Session {

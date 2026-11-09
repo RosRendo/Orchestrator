@@ -49,9 +49,112 @@ export class ProjectsController {
     return this.projectsService.listSystemDirectories(path);
   }
 
+  // ─── RendoOs & AI-Command-Agent Integrated Hub Endpoints ────────────────────
+
+  @Get('today/summary')
+  async getTodaySummary() {
+    return this.projectsService.getTodaySummary();
+  }
+
+  @Get('tasks/all')
+  async listAllTasks(@Query('projectId') projectId?: string) {
+    return this.projectsService.listTasks(projectId);
+  }
+
+  @Post('tasks')
+  async createTask(
+    @Body() body: {
+      projectId: string;
+      title: string;
+      description?: string;
+      bucket?: string;
+      priority?: string;
+    },
+  ) {
+    return this.projectsService.createTask(body);
+  }
+
+  @Patch('tasks/:taskId')
+  async updateTask(@Param('taskId') taskId: string, @Body() body: any) {
+    return this.projectsService.updateTask(taskId, body);
+  }
+
+  @Delete('tasks/:taskId')
+  async deleteTask(@Param('taskId') taskId: string) {
+    return this.projectsService.deleteTask(taskId);
+  }
+
+  @Get('ideas/all')
+  async listIdeas() {
+    return this.projectsService.listIdeas();
+  }
+
+  @Post('ideas')
+  async createIdea(
+    @Body() body: { title: string; description?: string; tags?: string; projectId?: string },
+  ) {
+    return this.projectsService.createIdea(body);
+  }
+
+  @Delete('ideas/:ideaId')
+  async deleteIdea(@Param('ideaId') ideaId: string) {
+    return this.projectsService.deleteIdea(ideaId);
+  }
+
+  @Post('ideas/:ideaId/convert')
+  async convertIdea(@Param('ideaId') ideaId: string) {
+    return this.projectsService.convertIdeaToProject(ideaId);
+  }
+
+  @Get('blockers/all')
+  async listBlockers() {
+    return this.projectsService.listBlockers();
+  }
+
+  @Post('blockers')
+  async createBlocker(
+    @Body() body: { projectId: string; title: string; description?: string },
+  ) {
+    return this.projectsService.createBlocker(body);
+  }
+
+  @Patch('blockers/:blockerId/resolve')
+  async resolveBlocker(@Param('blockerId') blockerId: string) {
+    return this.projectsService.resolveBlocker(blockerId);
+  }
+
+  @Get('playbook/all')
+  async listPlaybook(@Query('type') type?: string) {
+    return this.projectsService.listPlaybook(type);
+  }
+
+  @Post('playbook')
+  async createPlaybookEntry(
+    @Body() body: {
+      projectId?: string;
+      type: string;
+      title: string;
+      content: string;
+      tags?: string;
+      scope?: string;
+    },
+  ) {
+    return this.projectsService.createPlaybookEntry(body);
+  }
+
   @Get(':id')
   async getProject(@Param('id') id: string) {
     return this.projectsService.getProject(id);
+  }
+
+  @Get(':id/tasks')
+  async getProjectTasks(@Param('id') id: string) {
+    return this.projectsService.listTasks(id);
+  }
+
+  @Get(':id/gaps')
+  async getProjectGaps(@Param('id') id: string) {
+    return this.projectsService.scanProjectGaps(id);
   }
 
   @Delete(':id')
